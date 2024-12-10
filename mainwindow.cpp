@@ -35,7 +35,7 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     QMenu menu(this);
 
     QAction* addVertexAction = new QAction("Добавить вершину", this);
-    QAction* cancelAction = new QAction("Отмена", this);
+    QAction* cancelAction = new QAction("Отмена", this); // без коннекта, т.к. при нажатии автоматически закроется
 
     menu.addAction(addVertexAction);
     connect(addVertexAction, &QAction::triggered, this, &MainWindow::slotAddVertex);
@@ -53,13 +53,15 @@ void MainWindow::slotAddVertex()
 
     qreal radius = 30.0;
     /*
-      addEllipse ожидает координаты верхнего левого угла прямоугольника, в который вписан эллипс
+      первым и вторым параметром ожидаются координаты верхнего левого угла прямоугольника, в который вписан эллипс
       текущие расчеты позволяют отрисовывать эллипс на том месте, куда кликнул пользователь
     */
-    scene->addEllipse(mousePos.x() - radius, mousePos.y() - radius, 2 * radius, 2 * radius);
-
-    // Создаем текстовый элемент, который будет отображать индекс вершины
-    QGraphicsTextItem* textItem = scene->addText(QString::number(curVertexNum));
+    QGraphicsEllipseItem* ellipse = new QGraphicsEllipseItem(mousePos.x() - radius, mousePos.y() - radius, 2 * radius, 2 * radius);
+    /*
+      У QGraphicsEllipseItem нет метода для установки текста, поэтому отдельно создаем текст для эллипса/вершины
+      ниже сгуппируем через QGraphicsItemGroup и вершину и ее индекс
+    */
+    QGraphicsTextItem* textItem = new QGraphicsTextItem(QString::number(curVertexNum));
 
     // Устанавливаем шрифт и цвет текста
     QFont font = textItem->font();
@@ -70,5 +72,13 @@ void MainWindow::slotAddVertex()
     textItem->setPos(mousePos.x() - textItem->boundingRect().width() / 2,
                      mousePos.y() - textItem->boundingRect().height() / 2);
 
+    /* для отслеживания вершины по индексу группируем вершину вместе с ее индексом и добавляем в вектор */
+    QGraphicsItemGroup* group = new QGraphicsItemGroup();
+    group->addToGroup(ellipse);
+    group->addToGroup(textItem);
+
+    scene->addItem(group);
+
+    vertices.push_back(group);
     ++curVertexNum;
 }
