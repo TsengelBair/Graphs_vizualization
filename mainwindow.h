@@ -23,6 +23,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void handleCickOnVertex(Vertex* vertex);
+
 protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
 

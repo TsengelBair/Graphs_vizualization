@@ -3,7 +3,8 @@
 #include "vertex.h"
 
 Vertex::Vertex(qreal x, qreal y, qreal radius, int index, QGraphicsItem* parent)
-    : QGraphicsEllipseItem(x - radius, y - radius, 2 * radius, 2 * radius, parent),
+    : QObject(),
+      QGraphicsEllipseItem(x - radius, y - radius, 2 * radius, 2 * radius, parent),
       currentColor(Qt::black)
 {
     /* по умолчанию вершина с черной обводкой */
@@ -19,6 +20,7 @@ Vertex::Vertex(qreal x, qreal y, qreal radius, int index, QGraphicsItem* parent)
 
     textItem->setPos(x - textItem->boundingRect().width() / 2,
                      y - textItem->boundingRect().height() / 2);
+
 }
 
 QColor Vertex::getCurrentColor() const
@@ -34,8 +36,7 @@ void Vertex::setCurrentColor(const QColor &color)
 /* выделение вершины цветом при клике */
 void Vertex::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (pen().color() == Qt::red) setPen(QPen(Qt::black, 2));
-    else setPen(QPen(Qt::red, 3));
+    emit signalVertexClicked(this);
 
     // Вызываем базовую реализацию для стандартного поведения
     QGraphicsEllipseItem::mousePressEvent(event);

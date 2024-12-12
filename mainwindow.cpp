@@ -5,6 +5,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
 #include <QScreen>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -28,6 +29,26 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::handleCickOnVertex(Vertex *vertex)
+{
+    static Vertex* firstVertex = nullptr;
+    if (!firstVertex){
+        firstVertex = vertex;
+        vertex->setPen(QPen(Qt::red, 3));
+    } else {
+        vertex->setPen(QPen(Qt::red, 3));
+        // Логика для диалога
+        QMessageBox::information(this, "Вершины выбраны",
+                                 QString("Выбраны вершины %1 и %2")
+                                 .arg(vertices.indexOf(firstVertex))
+                                 .arg(vertices.indexOf(vertex)));
+
+        firstVertex->setPen(QPen(Qt::black, 2));
+        vertex->setPen(QPen(Qt::black, 2));
+        firstVertex = nullptr;
+    }
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
@@ -58,4 +79,6 @@ void MainWindow::slotAddVertex()
 
     vertices.push_back(vertex);
     ++curVertexNum;
+
+    connect(vertex, &Vertex::signalVertexClicked, this, &MainWindow::handleCickOnVertex);
 }
