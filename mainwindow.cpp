@@ -5,7 +5,12 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
 #include <QScreen>
-#include <QMessageBox>
+#include <QMessageBox> // убрать
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -31,23 +36,55 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::handleCickOnVertex(Vertex *vertex)
+void MainWindow::handleCickOnVertex(Vertex* vertex)
 {
     static Vertex* firstVertex = nullptr;
-    if (!firstVertex){
+
+    if (!firstVertex) {
+        // Если первая вершина не выбрана, запоминаем ее
         firstVertex = vertex;
         vertex->setPen(QPen(Qt::red, 3));
     } else {
+        // Если выбрана вторая вершина, создаем диалоговое окно
         vertex->setPen(QPen(Qt::red, 3));
-        // Логика для диалога
-        QMessageBox::information(this, "Вершины выбраны",
-                                 QString("Выбраны вершины %1 и %2")
-                                 .arg(vertices.indexOf(firstVertex))
-                                 .arg(vertices.indexOf(vertex)));
 
-        firstVertex->setPen(QPen(Qt::black, 2));
-        vertex->setPen(QPen(Qt::black, 2));
-        firstVertex = nullptr;
+        QDialog* edgeDialog = new QDialog(this);
+        edgeDialog->setWindowTitle("Добавить ребро");
+
+        QVBoxLayout* layout = new QVBoxLayout(edgeDialog);
+        QLabel* label = new QLabel("Введите вес ребра:");
+        QLineEdit* le = new QLineEdit();
+        QPushButton* createEdgeBtn = new QPushButton("Добавить ребро");
+        QPushButton* cancelBtn = new QPushButton("Отмена");
+
+        layout->addWidget(label);
+        layout->addWidget(le);
+        layout->addWidget(createEdgeBtn);
+        layout->addWidget(cancelBtn);
+        edgeDialog->setLayout(layout);
+
+        connect(edgeDialog, &QDialog::rejected, [=]() {
+            firstVertex->setPen(QPen(Qt::black, 2));
+            vertex->setPen(QPen(Qt::black, 2));
+            firstVertex = nullptr;
+        });
+
+        // Добавление ребра при нажатии кнопки
+        connect(createEdgeBtn, &QPushButton::clicked, [=]() {
+            qDebug() << "Введенное значение веса ребра:" << le->text();
+            qDebug() << "Ребро добавлено между вершинами:"
+                     << vertices.indexOf(firstVertex) << "и"
+                     << vertices.indexOf(vertex);
+
+            firstVertex->setPen(QPen(Qt::black, 2));
+            vertex->setPen(QPen(Qt::black, 2));
+            firstVertex = nullptr;
+
+            edgeDialog->accept();
+        });
+
+        connect(cancelBtn, &QPushButton::clicked, edgeDialog, &QDialog::reject);
+        edgeDialog->exec();
     }
 }
 
