@@ -23,6 +23,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    static Vertex* firstVertex;
+
 public slots:
     void handleCickOnVertex(Vertex* vertex);
 
@@ -31,6 +33,9 @@ protected:
 
 private slots:
     void slotAddVertex();
+
+private:
+    void showDialog(Vertex* second);
 
 private:
     Ui::MainWindow *ui;
