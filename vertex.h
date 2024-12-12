@@ -11,11 +11,15 @@ public:
     /* parent для того, чтобы сцена отвечала за очистку памяти текущего класса */
     explicit Vertex(qreal x, qreal y, qreal radius, int index, QGraphicsItem* parent = nullptr);
 
-    void setIndex(int index);
-    int getIndex() const;
+    QColor getCurrentColor() const ;
+    void setCurrentColor(const QColor& color);
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
     QGraphicsSimpleTextItem* textItem;
+    QColor currentColor;
 };
 
 #endif // VERTEX_H
