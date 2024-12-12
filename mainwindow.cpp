@@ -5,7 +5,6 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
 #include <QScreen>
-#include <QMessageBox> // убрать
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -18,7 +17,8 @@ Vertex* MainWindow::firstVertex = nullptr;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      curVertexNum(0)
+      curVertexNum(0),
+      radius(30.0)
 {
     ui->setupUi(this);
 
@@ -70,6 +70,7 @@ void MainWindow::showDialog(Vertex *second)
     edgeDialog->setLayout(layout);
 
     connect(edgeDialog, &QDialog::rejected, [=]() {
+        // Сбрасываем выделение, если пользователь отменяет ввод
         firstVertex->setPen(QPen(Qt::black, 2));
         second->setPen(QPen(Qt::black, 2));
         firstVertex = nullptr;
@@ -77,11 +78,37 @@ void MainWindow::showDialog(Vertex *second)
 
     // Добавление ребра при нажатии кнопки
     connect(createEdgeBtn, &QPushButton::clicked, [=]() {
-        qDebug() << "Введенное значение веса ребра:" << le->text();
+        QString weightText = le->text();
+        if (weightText.isEmpty()) {
+            qDebug() << "Вес ребра не введен!";
+            return;
+        }
+
+        bool ok;
+        double weight = weightText.toDouble(&ok);
+        if (!ok) {
+            qDebug() << "Ошибка: введите число!";
+            return;
+        }
+
+        // Координаты двух вершин
+        QPointF p1 = firstVertex->sceneBoundingRect().center();
+        QPointF p2 = second->sceneBoundingRect().center();
+
+        // Создаем ребро в виде линии
+        QGraphicsLineItem* edge = scene->addLine(QLineF(p1, p2), QPen(Qt::blue, 2));
+
+        // добавляем текст с весом ребра
+        QGraphicsTextItem* edgeWeight = scene->addText(weightText);
+        edgeWeight->setDefaultTextColor(Qt::blue);
+        edgeWeight->setPos((p1 + p2) / 2); // Размещаем текст по центру ребра
+
         qDebug() << "Ребро добавлено между вершинами:"
                  << vertices.indexOf(firstVertex) << "и"
-                 << vertices.indexOf(second);
+                 << vertices.indexOf(second)
+                 << "с весом" << weight;
 
+        // Сбрасываем выделение вершин
         firstVertex->setPen(QPen(Qt::black, 2));
         second->setPen(QPen(Qt::black, 2));
         firstVertex = nullptr;
@@ -113,8 +140,6 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 void MainWindow::slotAddVertex()
 {
     QPointF mousePos = ui->graphicsView->mapToScene(QCursor::pos());
-
-    qreal radius = 30.0;
     Vertex* vertex = new Vertex(mousePos.x(), mousePos.y(), radius, curVertexNum);
 
     scene->addItem(vertex);

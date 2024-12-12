@@ -40,6 +40,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QGraphicsScene* scene;
+    qreal radius;
     int curVertexNum; /* пока просто инкрементирую индекс добавляемых вершин */
 
     // вершины храню в векторе, т.к планирую обращаться по индексу
