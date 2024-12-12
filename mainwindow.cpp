@@ -52,33 +52,10 @@ void MainWindow::slotAddVertex()
     QPointF mousePos = ui->graphicsView->mapToScene(QCursor::pos());
 
     qreal radius = 30.0;
-    /*
-      первым и вторым параметром ожидаются координаты верхнего левого угла прямоугольника, в который вписан эллипс
-      текущие расчеты позволяют отрисовывать эллипс на том месте, куда кликнул пользователь
-    */
-    QGraphicsEllipseItem* ellipse = new QGraphicsEllipseItem(mousePos.x() - radius, mousePos.y() - radius, 2 * radius, 2 * radius);
-    /*
-      У QGraphicsEllipseItem нет метода для установки текста, поэтому отдельно создаем текст для эллипса/вершины
-      ниже сгуппируем через QGraphicsItemGroup и вершину и ее индекс
-    */
-    QGraphicsTextItem* textItem = new QGraphicsTextItem(QString::number(curVertexNum));
+    Vertex* vertex = new Vertex(mousePos.x(), mousePos.y(), radius, curVertexNum);
 
-    // Устанавливаем шрифт и цвет текста
-    QFont font = textItem->font();
-    font.setPointSize(20);
-    textItem->setFont(font);
+    scene->addItem(vertex);
 
-    // Позиционируем текст в центре эллипса
-    textItem->setPos(mousePos.x() - textItem->boundingRect().width() / 2,
-                     mousePos.y() - textItem->boundingRect().height() / 2);
-
-    /* для отслеживания вершины по индексу группируем вершину вместе с ее индексом и добавляем в вектор */
-    QGraphicsItemGroup* group = new QGraphicsItemGroup();
-    group->addToGroup(ellipse);
-    group->addToGroup(textItem);
-
-    scene->addItem(group);
-
-    vertices.push_back(group);
+    vertices.push_back(vertex);
     ++curVertexNum;
 }

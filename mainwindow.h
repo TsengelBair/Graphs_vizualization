@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "vertex.h"
+
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QAction>
@@ -33,10 +35,6 @@ private:
     int curVertexNum; /* пока просто инкрементирую индекс добавляемых вершин */
 
     // вершины храню в векторе, т.к планирую обращаться по индексу
-    QVector<QGraphicsItemGroup*> vertices;
-
-    // ключ - пара вершин (их номера), значение - это вес ребра
-    // исп-ю QHas, т.к. при добавлении будет проверка на существование
-    QHash<QPair<int, int>, int> edges;
+    QVector<Vertex*> vertices;
 };
 #endif // MAINWINDOW_H
