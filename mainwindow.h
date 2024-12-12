@@ -1,19 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "vertex.h"
-
 #include <QMainWindow>
 #include <QGraphicsScene>
-#include <QAction>
 #include <QMenu>
-#include <QContextMenuEvent>
-#include <QVector>
-#include <QHash>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+class Vertex;
 
 class MainWindow : public QMainWindow
 {
@@ -23,27 +19,40 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static Vertex* firstVertex;
+    void setFirstVertex(Vertex* vertex);
+    Vertex* getFirstVertex();
 
 public slots:
-    void handleCickOnVertex(Vertex* vertex);
+    void slotHandleVertexClick(Vertex* clickedVertex);
 
 protected:
-    void contextMenuEvent(QContextMenuEvent *event) override;
+    /* создание контекстного меню по ПКМ */
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
 private slots:
     void slotAddVertex();
 
 private:
-    void showDialog(Vertex* second);
+    /*
+       открытие диалогового окна, должно появиться когда "нажаты" две вершины
+       внутри форма, в которую нужно ввести вес ребра
+    */
+    void showDialog(Vertex* secondSelectedVertex);
 
 private:
+    /* отслеживаем первую "нажатую" вершину */
+    Vertex* firstSelectedVertex;
+
+    /* QGraphicView определен в UI */
     Ui::MainWindow *ui;
     QGraphicsScene* scene;
+    /* счетчик для установки индекса текущей вершины */
+    int currentVertexNum;
+    /*
+       радиус вершины (вершина представлена кругом)
+       использую qreal так как именно этот тип данных ожидается в QGraphicEllipse
+    */
     qreal radius;
-    int curVertexNum; /* пока просто инкрементирую индекс добавляемых вершин */
-
-    // вершины храню в векторе, т.к планирую обращаться по индексу
-    QVector<Vertex*> vertices;
+    QVector<Vertex*>vertices;
 };
 #endif // MAINWINDOW_H

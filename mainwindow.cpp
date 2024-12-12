@@ -1,36 +1,35 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "vertex.h"
 
 #include <QDebug>
-#include <QGraphicsEllipseItem>
-#include <QGraphicsTextItem>
 #include <QScreen>
+#include <QContextMenuEvent>
 #include <QDialog>
-#include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 
-/* инициализация статического поля класса */
-Vertex* MainWindow::firstVertex = nullptr;
-
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow),
-      curVertexNum(0),
-      radius(30.0)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , currentVertexNum(0)
+    , radius(30.0)
+    , firstSelectedVertex(nullptr)
 {
     ui->setupUi(this);
 
     scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
 
-    // Получаем размер экрана
+    /* Получаем размер экрана */
     QRect screenGeometry = QApplication::primaryScreen()->geometry();
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
-
-    // Устанавливаем фиксированные границы сцены, чтобы она не изменялась
+    /*
+       Устанавливаем фиксированные границы сцены
+       в противном случае при добавлении вершин происходит перемещение всех вершин
+    */
     scene->setSceneRect(0, 0, screenWidth, screenHeight);
 }
 
@@ -39,21 +38,46 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::handleCickOnVertex(Vertex* vertex)
+void MainWindow::setFirstVertex(Vertex *vertex)
 {
-    if (!firstVertex) {
-        // Если первая вершина не выбрана, запоминаем ее
-        firstVertex = vertex;
-        vertex->setPen(QPen(Qt::red, 3));
+    firstSelectedVertex = vertex;
+}
+
+Vertex *MainWindow::getFirstVertex()
+{
+    return firstSelectedVertex;
+}
+
+void MainWindow::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu menu(this);
+
+    QAction* addVertexAction = new QAction("Добавить вершину", this);
+    QAction* cancelAction = new QAction("Отмена", this); // без коннекта, т.к. при нажатии автоматически закроется
+
+    menu.addAction(addVertexAction);
+    connect(addVertexAction, &QAction::triggered, this, &MainWindow::slotAddVertex);
+
+    menu.addAction(cancelAction);
+
+    // Отображаем меню в позиции курсора
+    menu.exec(event->globalPos());
+}
+
+void MainWindow::slotHandleVertexClick(Vertex *clickedVertex)
+{
+    if (!firstSelectedVertex){
+        setFirstVertex(clickedVertex);
+        clickedVertex->setPen(QPen(Qt::red, 3));
     } else {
-        showDialog(vertex);
+        showDialog(clickedVertex);
     }
 }
 
-void MainWindow::showDialog(Vertex *second)
+void MainWindow::showDialog(Vertex *secondSelectedVertex)
 {
     // Если выбрана вторая вершина, создаем диалоговое окно
-    second->setPen(QPen(Qt::red, 3));
+    secondSelectedVertex->setPen(QPen(Qt::red, 3));
 
     QDialog* edgeDialog = new QDialog(this);
 
@@ -69,11 +93,11 @@ void MainWindow::showDialog(Vertex *second)
     layout->addWidget(cancelBtn);
     edgeDialog->setLayout(layout);
 
-    connect(edgeDialog, &QDialog::rejected, [=]() {
+    connect(edgeDialog, &QDialog::rejected, [&]() {
         // Сбрасываем выделение, если пользователь отменяет ввод
-        firstVertex->setPen(QPen(Qt::black, 2));
-        second->setPen(QPen(Qt::black, 2));
-        firstVertex = nullptr;
+        firstSelectedVertex->setPen(QPen(Qt::black, 2));
+        secondSelectedVertex->setPen(QPen(Qt::black, 2));
+        setFirstVertex(nullptr);
     });
 
     // Добавление ребра при нажатии кнопки
@@ -92,8 +116,8 @@ void MainWindow::showDialog(Vertex *second)
         }
 
         // Координаты двух вершин
-        QPointF p1 = firstVertex->sceneBoundingRect().center();
-        QPointF p2 = second->sceneBoundingRect().center();
+        QPointF p1 = firstSelectedVertex->sceneBoundingRect().center();
+        QPointF p2 = secondSelectedVertex->sceneBoundingRect().center();
 
         // Создаем ребро в виде линии
         QGraphicsLineItem* edge = scene->addLine(QLineF(p1, p2), QPen(Qt::blue, 2));
@@ -104,14 +128,14 @@ void MainWindow::showDialog(Vertex *second)
         edgeWeight->setPos((p1 + p2) / 2); // Размещаем текст по центру ребра
 
         qDebug() << "Ребро добавлено между вершинами:"
-                 << vertices.indexOf(firstVertex) << "и"
-                 << vertices.indexOf(second)
+                 << vertices.indexOf(firstSelectedVertex) << "и"
+                 << vertices.indexOf(secondSelectedVertex)
                  << "с весом" << weight;
 
         // Сбрасываем выделение вершин
-        firstVertex->setPen(QPen(Qt::black, 2));
-        second->setPen(QPen(Qt::black, 2));
-        firstVertex = nullptr;
+        firstSelectedVertex->setPen(QPen(Qt::black, 2));
+        secondSelectedVertex->setPen(QPen(Qt::black, 2));
+        firstSelectedVertex = nullptr;
 
         edgeDialog->accept();
     });
@@ -120,32 +144,17 @@ void MainWindow::showDialog(Vertex *second)
     edgeDialog->exec();
 }
 
-void MainWindow::contextMenuEvent(QContextMenuEvent *event)
-{
-    QMenu menu(this);
-
-    QAction* addVertexAction = new QAction("Добавить вершину", this);
-    QAction* cancelAction = new QAction("Отмена", this); // без коннекта, т.к. при нажатии автоматически закроется
-
-    menu.addAction(addVertexAction);
-    connect(addVertexAction, &QAction::triggered, this, &MainWindow::slotAddVertex);
-
-    menu.addAction(cancelAction);
-
-    // Отображаем меню в позиции курсора
-    menu.exec(event->globalPos());
-
-}
-
 void MainWindow::slotAddVertex()
 {
     QPointF mousePos = ui->graphicsView->mapToScene(QCursor::pos());
-    Vertex* vertex = new Vertex(mousePos.x(), mousePos.y(), radius, curVertexNum);
+    Vertex* vertex = new Vertex(mousePos.x(), mousePos.y(), radius, currentVertexNum);
 
     scene->addItem(vertex);
 
     vertices.push_back(vertex);
-    ++curVertexNum;
+    ++currentVertexNum;
 
-    connect(vertex, &Vertex::signalVertexClicked, this, &MainWindow::handleCickOnVertex);
+    connect(vertex, &Vertex::signalVertexClicked, this, &MainWindow::slotHandleVertexClick);
 }
+
+

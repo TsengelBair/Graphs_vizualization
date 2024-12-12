@@ -1,43 +1,30 @@
-#include <QPen>
-
 #include "vertex.h"
 
-Vertex::Vertex(qreal x, qreal y, qreal radius, int index, QGraphicsItem* parent)
-    : QObject(),
-      QGraphicsEllipseItem(x - radius, y - radius, 2 * radius, 2 * radius, parent),
-      currentColor(Qt::black)
+#include <QPen>
+#include <QFont>
+#include <QGraphicsTextItem>
+
+Vertex::Vertex(qreal x, qreal y, qreal radius, int index)
+    : QObject()
+    , QGraphicsEllipseItem(QRectF(x - radius, y - radius, 2 * radius, 2 * radius))
+    , _index(index)
 {
-    /* по умолчанию вершина с черной обводкой */
+    // черная обводка по умолчанию
     setPen(QPen(Qt::black, 2));
 
-    // Создаем текстовый элемент и добавляем его в качестве дочернего элемента
-    textItem = new QGraphicsSimpleTextItem(QString::number(index), this);
+    // Добавляем текст с индексом в центр вершины
+    QGraphicsTextItem* textItem = new QGraphicsTextItem(QString::number(index), this);
 
-    // Настраиваем шрифт и позиционируем текст по центру эллипса
+    // Настраиваем шрифт и позиционируем текст
     QFont font = textItem->font();
     font.setPointSize(20);
     textItem->setFont(font);
 
-    textItem->setPos(x - textItem->boundingRect().width() / 2,
-                     y - textItem->boundingRect().height() / 2);
-
+    textItem->setPos(boundingRect().center() - QPointF(textItem->boundingRect().width() / 2,
+                                               textItem->boundingRect().height() / 2));
 }
 
-QColor Vertex::getCurrentColor() const
-{
-    return currentColor;
-}
-
-void Vertex::setCurrentColor(const QColor &color)
-{
-    currentColor = color;
-}
-
-/* выделение вершины цветом при клике */
 void Vertex::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     emit signalVertexClicked(this);
-
-    // Вызываем базовую реализацию для стандартного поведения
-    QGraphicsEllipseItem::mousePressEvent(event);
 }

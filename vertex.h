@@ -1,29 +1,25 @@
 #ifndef VERTEX_H
 #define VERTEX_H
 
+#include <QObject>
 #include <QGraphicsEllipseItem>
-#include <QGraphicsSimpleTextItem>
-#include <QFont>
 
 class Vertex : public QObject, public QGraphicsEllipseItem
 {
     Q_OBJECT
 public:
-    /* parent для того, чтобы сцена отвечала за очистку памяти текущего класса */
-    explicit Vertex(qreal x, qreal y, qreal radius, int index, QGraphicsItem* parent = nullptr);
-
-    QColor getCurrentColor() const ;
-    void setCurrentColor(const QColor& color);
+    explicit Vertex(qreal x, qreal y, qreal radius, int index);
 
 signals:
+    /* сигнал клика по вершине обработаем в mainwindow */
     void signalVertexClicked(Vertex* vertex);
 
 protected:
+    /* в переопределенном событии emit signalVertexClicked */
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    QGraphicsSimpleTextItem* textItem;
-    QColor currentColor;
+    int _index;
 };
 
 #endif // VERTEX_H
