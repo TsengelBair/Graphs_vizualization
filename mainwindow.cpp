@@ -72,7 +72,10 @@ void MainWindow::slotHandleVertexClick(Vertex *clickedVertex)
     if (!firstSelectedVertex){
         setFirstVertex(clickedVertex);
         clickedVertex->setPen(QPen(Qt::red, 3));
-    } else {
+    } else if (firstSelectedVertex && firstSelectedVertex == clickedVertex){
+        firstSelectedVertex->setPen(QPen(Qt::black, 2));
+        setFirstVertex(nullptr);
+    }  else {
         showDialog(clickedVertex);
     }
 }
