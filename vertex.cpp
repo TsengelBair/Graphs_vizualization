@@ -21,7 +21,12 @@ Vertex::Vertex(qreal x, qreal y, qreal radius, int index)
     textItem->setFont(font);
 
     textItem->setPos(boundingRect().center() - QPointF(textItem->boundingRect().width() / 2,
-                                               textItem->boundingRect().height() / 2));
+                                                       textItem->boundingRect().height() / 2));
+}
+
+int Vertex::getIndex() const
+{
+    return _index;
 }
 
 void Vertex::mousePressEvent(QGraphicsSceneMouseEvent* event)

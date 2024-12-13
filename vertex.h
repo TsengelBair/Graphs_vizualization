@@ -10,6 +10,8 @@ class Vertex : public QObject, public QGraphicsEllipseItem
 public:
     explicit Vertex(qreal x, qreal y, qreal radius, int index);
 
+    int getIndex() const ;
+
 signals:
     /* сигнал клика по вершине обработаем в mainwindow */
     void signalVertexClicked(Vertex* vertex);

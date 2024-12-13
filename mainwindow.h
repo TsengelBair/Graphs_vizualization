@@ -40,6 +40,7 @@ private:
     */
     void showDialog(Vertex* secondSelectedVertex);
     void handleFindPath();
+    void highlightFindPath(QVector<int>&path);
 
 private:
     /* отслеживаем первую "нажатую" вершину */

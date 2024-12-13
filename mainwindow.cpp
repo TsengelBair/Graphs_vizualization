@@ -208,13 +208,22 @@ void MainWindow::handleFindPath()
     connect(findPath, &QPushButton::clicked, this, [=](){
         int start = leStart->text().toInt();
         int end = leEnd->text().toInt();
-        auto res = GraphAlgos::djkstra(graph, start, end);
-        for (int i = 0; i < res.size(); ++i){
-            qDebug() << res[i] << " ";
-        }
+        QVector<int> res = GraphAlgos::djkstra(graph, start, end);
+        highlightFindPath(res);
+//        for (int i = 0; i < res.size(); ++i){
+//            qDebug() << res[i] << " ";
+//        }
+
     });
 
     dialog->exec();
 }
 
-
+void MainWindow::highlightFindPath(QVector<int>&path)
+{
+    for (int i = 0; i < path.size() - 1; ++i){
+        QPointF p1 = vertices[path[i]]->sceneBoundingRect().center();
+        QPointF p2 = vertices[path[i + 1]]->sceneBoundingRect().center();
+        QGraphicsLineItem* edge = scene->addLine(QLineF(p1, p2), QPen(Qt::green, 3));
+    }
+}
