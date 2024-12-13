@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -56,14 +57,14 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     QMenu menu(this);
 
     QAction* addVertexAction = new QAction("Добавить вершину", this);
-    QAction* cancelAction = new QAction("Отмена", this); // без коннекта, т.к. при нажатии автоматически закроется
+    QAction* cancelAction = new QAction("Отмена", this); /* без коннекта, т.к. при нажатии автоматически закроется */
 
     menu.addAction(addVertexAction);
     connect(addVertexAction, &QAction::triggered, this, &MainWindow::slotAddVertex);
 
     menu.addAction(cancelAction);
 
-    // Отображаем меню в позиции курсора
+    /* Отображаем меню в позиции курсора */
     menu.exec(event->globalPos());
 }
 
@@ -82,7 +83,7 @@ void MainWindow::slotHandleVertexClick(Vertex *clickedVertex)
 
 void MainWindow::showDialog(Vertex *secondSelectedVertex)
 {
-    // Если выбрана вторая вершина, создаем диалоговое окно
+    /* Если выбрана вторая вершина, создаем диалоговое окно */
     secondSelectedVertex->setPen(QPen(Qt::red, 3));
 
     QDialog* edgeDialog = new QDialog(this);
@@ -93,6 +94,9 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
     QPushButton* createEdgeBtn = new QPushButton("Добавить ребро");
     QPushButton* cancelBtn = new QPushButton("Отмена");
 
+    QValidator* validator = new QIntValidator(0, 10000, this);
+    le->setValidator(validator);
+
     layout->addWidget(label);
     layout->addWidget(le);
     layout->addWidget(createEdgeBtn);
@@ -100,13 +104,13 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
     edgeDialog->setLayout(layout);
 
     connect(edgeDialog, &QDialog::rejected, [&]() {
-        // Сбрасываем выделение, если пользователь отменяет ввод
+        /* Сбрасываем выделение, если пользователь отменяет ввод */
         firstSelectedVertex->setPen(QPen(Qt::black, 2));
         secondSelectedVertex->setPen(QPen(Qt::black, 2));
         setFirstVertex(nullptr);
     });
 
-    // Добавление ребра при нажатии кнопки
+    /* Добавление ребра при нажатии кнопки */
     connect(createEdgeBtn, &QPushButton::clicked ,this, [=]() {
         QString weightText = le->text();
         if (weightText.isEmpty()) {
@@ -121,17 +125,17 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
             return;
         }
 
-        // Координаты двух вершин
+        /* Координаты двух вершин */
         QPointF p1 = firstSelectedVertex->sceneBoundingRect().center();
         QPointF p2 = secondSelectedVertex->sceneBoundingRect().center();
 
-        // Создаем ребро в виде линии
+        /* Создаем ребро в виде линии */
         QGraphicsLineItem* edge = scene->addLine(QLineF(p1, p2), QPen(Qt::blue, 2));
 
-        // добавляем текст с весом ребра
+        /* добавляем текст с весом ребра */
         QGraphicsTextItem* edgeWeight = scene->addText(weightText);
         edgeWeight->setDefaultTextColor(Qt::blue);
-        edgeWeight->setPos((p1 + p2) / 2); // Размещаем текст по центру ребра
+        edgeWeight->setPos((p1 + p2) / 2); /* Размещаем текст по центру ребра */
 
         qDebug() << "Ребро добавлено между вершинами:"
                  << vertices.indexOf(firstSelectedVertex) << "и"
@@ -142,7 +146,7 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
         graph[vertices.indexOf(firstSelectedVertex)][vertices.indexOf(secondSelectedVertex)] = weight;
         graph[vertices.indexOf(secondSelectedVertex)][vertices.indexOf(firstSelectedVertex)] = weight;
 
-        // Сбрасываем выделение вершин
+        /* Сбрасываем выделение вершин */
         firstSelectedVertex->setPen(QPen(Qt::black, 2));
         secondSelectedVertex->setPen(QPen(Qt::black, 2));
         firstSelectedVertex = nullptr;
@@ -198,6 +202,10 @@ void MainWindow::handleFindPath()
     QLineEdit* leEnd = new QLineEdit();
     QPushButton* findPath = new QPushButton("Найти");
 
+    QValidator* validator = new QIntValidator(0, vertices.size(), this);
+    leStart->setValidator(validator);
+    leEnd->setValidator(validator);
+
     layout->addWidget(lbFirst);
     layout->addWidget(leStart);
     layout->addWidget(lbEnd);
@@ -210,10 +218,6 @@ void MainWindow::handleFindPath()
         int end = leEnd->text().toInt();
         QVector<int> res = GraphAlgos::djkstra(graph, start, end);
         highlightFindPath(res);
-//        for (int i = 0; i < res.size(); ++i){
-//            qDebug() << res[i] << " ";
-//        }
-
     });
 
     dialog->exec();

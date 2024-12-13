@@ -24,4 +24,4 @@ private:
     int _index;
 };
 
-#endif // VERTEX_H
+#endif /* VERTEX_H */

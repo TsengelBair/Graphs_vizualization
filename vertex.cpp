@@ -9,13 +9,13 @@ Vertex::Vertex(qreal x, qreal y, qreal radius, int index)
     , QGraphicsEllipseItem(QRectF(x - radius, y - radius, 2 * radius, 2 * radius))
     , _index(index)
 {
-    // черная обводка по умолчанию
+    /* черная обводка по умолчанию */
     setPen(QPen(Qt::black, 2));
 
-    // Добавляем текст с индексом в центр вершины
+    /* Добавляем текст с индексом в центр вершины */
     QGraphicsTextItem* textItem = new QGraphicsTextItem(QString::number(index), this);
 
-    // Настраиваем шрифт и позиционируем текст
+    /* Настраиваем шрифт и позиционируем текст */
     QFont font = textItem->font();
     font.setPointSize(20);
     textItem->setFont(font);

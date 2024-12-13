@@ -62,4 +62,4 @@ private:
     */
     QVector<QVector<int>>graph;
 };
-#endif // MAINWINDOW_H
+#endif /* MAINWINDOW_H */
