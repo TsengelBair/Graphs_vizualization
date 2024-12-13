@@ -23,16 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
-
-    /* Получаем размер экрана */
-    QRect screenGeometry = QApplication::primaryScreen()->geometry();
-    int screenWidth = screenGeometry.width();
-    int screenHeight = screenGeometry.height();
     /*
        Устанавливаем фиксированные границы сцены
        в противном случае при добавлении вершин происходит перемещение всех вершин
     */
-    scene->setSceneRect(0, 0, screenWidth, screenHeight);
+    scene->setSceneRect(0, 0, QApplication::primaryScreen()->geometry().width(), QApplication::primaryScreen()->geometry().height());
 
     connect(ui->findPathBtn, &QPushButton::clicked, this, &MainWindow::handleFindPath);
 }
@@ -45,11 +40,6 @@ MainWindow::~MainWindow()
 void MainWindow::setFirstVertex(Vertex *vertex)
 {
     firstSelectedVertex = vertex;
-}
-
-Vertex *MainWindow::getFirstVertex()
-{
-    return firstSelectedVertex;
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
@@ -228,6 +218,6 @@ void MainWindow::highlightFindPath(QVector<int>&path)
     for (int i = 0; i < path.size() - 1; ++i){
         QPointF p1 = vertices[path[i]]->sceneBoundingRect().center();
         QPointF p2 = vertices[path[i + 1]]->sceneBoundingRect().center();
-        QGraphicsLineItem* edge = scene->addLine(QLineF(p1, p2), QPen(Qt::green, 3));
+        scene->addLine(QLineF(p1, p2), QPen(Qt::green, 3));
     }
 }

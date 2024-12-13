@@ -20,8 +20,6 @@ public:
     ~MainWindow();
 
     void setFirstVertex(Vertex* vertex);
-    Vertex* getFirstVertex();
-
 
 public slots:
     void slotHandleVertexClick(Vertex* clickedVertex);
