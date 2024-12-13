@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
         mainwindow.ui
         vertex.h
         vertex.cpp
+        graphalgos.h
+        graphalgos.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

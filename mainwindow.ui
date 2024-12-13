@@ -18,6 +18,13 @@
     <item row="0" column="0">
      <widget class="QGraphicsView" name="graphicsView"/>
     </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="findPathBtn">
+      <property name="text">
+       <string>Найти кратчайший путь</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">

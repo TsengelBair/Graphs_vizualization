@@ -22,6 +22,7 @@ public:
     void setFirstVertex(Vertex* vertex);
     Vertex* getFirstVertex();
 
+
 public slots:
     void slotHandleVertexClick(Vertex* clickedVertex);
 
@@ -38,6 +39,7 @@ private:
        внутри форма, в которую нужно ввести вес ребра
     */
     void showDialog(Vertex* secondSelectedVertex);
+    void handleFindPath();
 
 private:
     /* отслеживаем первую "нажатую" вершину */
@@ -54,5 +56,9 @@ private:
     */
     qreal radius;
     QVector<Vertex*>vertices;
+    /*
+       граф в виде матрицы смежности
+    */
+    QVector<QVector<int>>graph;
 };
 #endif // MAINWINDOW_H

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "vertex.h"
+#include "graphalgos.h"
 
 #include <QDebug>
 #include <QScreen>
@@ -31,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
        в противном случае при добавлении вершин происходит перемещение всех вершин
     */
     scene->setSceneRect(0, 0, screenWidth, screenHeight);
+
+    connect(ui->findPathBtn, &QPushButton::clicked, this, &MainWindow::handleFindPath);
 }
 
 MainWindow::~MainWindow()
@@ -101,7 +104,7 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
     });
 
     // Добавление ребра при нажатии кнопки
-    connect(createEdgeBtn, &QPushButton::clicked, [=]() {
+    connect(createEdgeBtn, &QPushButton::clicked ,this, [=]() {
         QString weightText = le->text();
         if (weightText.isEmpty()) {
             qDebug() << "Вес ребра не введен!";
@@ -109,7 +112,7 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
         }
 
         bool ok;
-        double weight = weightText.toDouble(&ok);
+        int weight = weightText.toInt(&ok);
         if (!ok) {
             qDebug() << "Ошибка: введите число!";
             return;
@@ -131,6 +134,10 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
                  << vertices.indexOf(firstSelectedVertex) << "и"
                  << vertices.indexOf(secondSelectedVertex)
                  << "с весом" << weight;
+
+        /* дважды, т.к. граф неориентированный */
+        graph[vertices.indexOf(firstSelectedVertex)][vertices.indexOf(secondSelectedVertex)] = weight;
+        graph[vertices.indexOf(secondSelectedVertex)][vertices.indexOf(firstSelectedVertex)] = weight;
 
         // Сбрасываем выделение вершин
         firstSelectedVertex->setPen(QPen(Qt::black, 2));
@@ -154,7 +161,57 @@ void MainWindow::slotAddVertex()
     vertices.push_back(vertex);
     ++currentVertexNum;
 
+    /* при добавлении вершины ресайзим граф и размер каждой вершины */
+    graph.resize(vertices.size());
+    for (int i = 0; i < graph.size(); ++i){
+        graph[i].resize(graph.size());
+    }
+
+    qDebug() << graph.size();
+
     connect(vertex, &Vertex::signalVertexClicked, this, &MainWindow::slotHandleVertexClick);
+}
+
+void MainWindow::handleFindPath()
+{
+    /*
+        Если ребро между вершинами отсутствует, значение graph[i][j] == 0
+        graph[i][j] = 10000 это идентификация отсутствия ребра
+        элементы главной диагонали всегда нули (граф не петлевой)
+    */
+    for (int i = 0; i < graph.size(); ++i){
+        for (int j = 0; j < graph.size(); ++j){
+            if (i != j && graph[i][j] == 0){
+                graph[i][j] = 10000;
+            }
+        }
+    }
+    QDialog* dialog = new QDialog(this);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+    QLabel* lbFirst = new QLabel("Стартовая вершина:");
+    QLineEdit* leStart = new QLineEdit();
+    QLabel* lbEnd = new QLabel("Конечная вершина:");
+    QLineEdit* leEnd = new QLineEdit();
+    QPushButton* findPath = new QPushButton("Найти");
+
+    layout->addWidget(lbFirst);
+    layout->addWidget(leStart);
+    layout->addWidget(lbEnd);
+    layout->addWidget(leEnd);
+    layout->addWidget(findPath);
+    dialog->setLayout(layout);
+
+    connect(findPath, &QPushButton::clicked, this, [=](){
+        int start = leStart->text().toInt();
+        int end = leEnd->text().toInt();
+        auto res = GraphAlgos::djkstra(graph, start, end);
+        for (int i = 0; i < res.size(); ++i){
+            qDebug() << res[i] << " ";
+        }
+    });
+
+    dialog->exec();
 }
 
 
