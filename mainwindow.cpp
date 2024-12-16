@@ -9,8 +9,8 @@
 #include <QDialog>
 #include <QLabel>
 #include <QLineEdit>
+#include <QComboBox>
 #include <QPushButton>
-#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -83,9 +83,6 @@ void MainWindow::showDialog(Vertex *secondSelectedVertex)
     QLineEdit* le = new QLineEdit();
     QPushButton* createEdgeBtn = new QPushButton("Добавить ребро");
     QPushButton* cancelBtn = new QPushButton("Отмена");
-
-    QValidator* validator = new QIntValidator(0, 10000, this);
-    le->setValidator(validator);
 
     layout->addWidget(label);
     layout->addWidget(le);
@@ -187,25 +184,27 @@ void MainWindow::handleFindPath()
 
     QVBoxLayout* layout = new QVBoxLayout(dialog);
     QLabel* lbFirst = new QLabel("Стартовая вершина:");
-    QLineEdit* leStart = new QLineEdit();
+
+    QComboBox* startComboBox = new QComboBox(this);
+    QComboBox* endComboBox = new QComboBox(this);
+    for (int i = 0; i < vertices.size(); ++i){
+        startComboBox->addItem(QString::number(i));
+        endComboBox->addItem(QString::number(i));
+    }
+
     QLabel* lbEnd = new QLabel("Конечная вершина:");
-    QLineEdit* leEnd = new QLineEdit();
     QPushButton* findPath = new QPushButton("Найти");
 
-    QValidator* validator = new QIntValidator(0, vertices.size(), this);
-    leStart->setValidator(validator);
-    leEnd->setValidator(validator);
-
     layout->addWidget(lbFirst);
-    layout->addWidget(leStart);
+    layout->addWidget(startComboBox);
     layout->addWidget(lbEnd);
-    layout->addWidget(leEnd);
+    layout->addWidget(endComboBox);
     layout->addWidget(findPath);
     dialog->setLayout(layout);
 
     connect(findPath, &QPushButton::clicked, this, [=](){
-        int start = leStart->text().toInt();
-        int end = leEnd->text().toInt();
+        int start = startComboBox->currentIndex();
+        int end = endComboBox->currentIndex();
         QVector<int> res = GraphAlgos::djkstra(graph, start, end);
         highlightFindPath(res);
     });
