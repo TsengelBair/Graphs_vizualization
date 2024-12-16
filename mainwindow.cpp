@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -30,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     scene->setSceneRect(0, 0, QApplication::primaryScreen()->geometry().width(), QApplication::primaryScreen()->geometry().height());
 
     connect(ui->findPathBtn, &QPushButton::clicked, this, &MainWindow::handleFindPath);
+    connect(ui->resetGraphBtn, &QPushButton::clicked, this, &MainWindow::resetGraph);
 }
 
 MainWindow::~MainWindow()
@@ -207,6 +209,7 @@ void MainWindow::handleFindPath()
         int end = endComboBox->currentIndex();
         QVector<int> res = GraphAlgos::djkstra(graph, start, end);
         highlightFindPath(res);
+        dialog->accept();
     });
 
     dialog->exec();
@@ -218,5 +221,16 @@ void MainWindow::highlightFindPath(QVector<int>&path)
         QPointF p1 = vertices[path[i]]->sceneBoundingRect().center();
         QPointF p2 = vertices[path[i + 1]]->sceneBoundingRect().center();
         scene->addLine(QLineF(p1, p2), QPen(Qt::green, 3));
+    }
+}
+
+void MainWindow::resetGraph()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Предупреждение", "Подтвердите удаление графа", QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes){
+        vertices.clear();
+        scene->clear();
     }
 }

@@ -37,8 +37,13 @@ private:
        внутри форма, в которую нужно ввести вес ребра
     */
     void showDialog(Vertex* secondSelectedVertex);
+    /*
+        нахождение пути с подсветкой используемых ребер
+    */
     void handleFindPath();
     void highlightFindPath(QVector<int>&path);
+
+    void resetGraph();
 
 private:
     /* отслеживаем первую "нажатую" вершину */
