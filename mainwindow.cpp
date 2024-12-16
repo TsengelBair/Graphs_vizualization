@@ -22,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->resetFindedPathBtn->setVisible(false);
+
     scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
     /*
@@ -182,6 +184,7 @@ void MainWindow::handleFindPath()
             }
         }
     }
+
     QDialog* dialog = new QDialog(this);
 
     QVBoxLayout* layout = new QVBoxLayout(dialog);
@@ -216,12 +219,21 @@ void MainWindow::handleFindPath()
 }
 
 void MainWindow::highlightFindPath(QVector<int>&path)
-{
+{   
     for (int i = 0; i < path.size() - 1; ++i){
         QPointF p1 = vertices[path[i]]->sceneBoundingRect().center();
         QPointF p2 = vertices[path[i + 1]]->sceneBoundingRect().center();
-        scene->addLine(QLineF(p1, p2), QPen(Qt::green, 3));
+        scene->addLine(QLineF(p1, p2), QPen(Qt::green, 2));
     }
+
+    ui->resetFindedPathBtn->setVisible(true);
+    connect(ui->resetFindedPathBtn, &QPushButton::clicked, [=](){
+        for (int i = 0; i < path.size() - 1; ++i){
+            QPointF p1 = vertices[path[i]]->sceneBoundingRect().center();
+            QPointF p2 = vertices[path[i + 1]]->sceneBoundingRect().center();
+            scene->addLine(QLineF(p1, p2), QPen(Qt::blue, 2));
+        }
+    });
 }
 
 void MainWindow::resetGraph()
@@ -232,5 +244,7 @@ void MainWindow::resetGraph()
     if (reply == QMessageBox::Yes){
         vertices.clear();
         scene->clear();
+        currentVertexNum = 0;
+        ui->resetFindedPathBtn->setVisible(false);
     }
 }
