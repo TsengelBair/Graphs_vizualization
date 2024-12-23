@@ -46,7 +46,7 @@ private:
         создаем диалоговое окно с копией введенного графа
         исходный граф в основном окне сбросим для визуализации
     */
-    void createGraphClone();
+    void createGraphClone(int start, int end);
 
     void resetGraph();
 

@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     ui->resetFindedPathBtn->setVisible(false);
+    ui->viewOriginalGraphBtn->setVisible(false);
 
     scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
@@ -212,14 +213,9 @@ void MainWindow::handleFindPath()
         int start = startComboBox->currentIndex();
         int end = endComboBox->currentIndex();
 
-        dialog->accept();
+        dialog->accept(); // accept перед вызовом, чтобы текущее диалоговое окно закрылось
+        createGraphClone(start, end);
 
-        createGraphClone();
-
-/*        QVector<int> res = GraphAlgos::djkstra(graph, start, end); */
-/*        highlightFindPath(res); */
-
-/*        dialog->accept(); */
     });
 
     dialog->exec();
@@ -243,10 +239,12 @@ void MainWindow::highlightFindPath(QVector<int>&path)
     });
 }
 
-void MainWindow::createGraphClone()
+void MainWindow::createGraphClone(int start, int end)
 {
+    ui->viewOriginalGraphBtn->setVisible(true);
+
     sceneCloneWidget = new QWidget();
-    sceneCloneWidget->setWindowTitle("Исходный граф, на основе которого ищем кратчайшие пути");
+    sceneCloneWidget->setWindowTitle("Исходный граф");
 
     /* Создаём виджет QGraphicsView */
     QGraphicsView* view = new QGraphicsView(sceneCloneWidget);
@@ -279,7 +277,14 @@ void MainWindow::createGraphClone()
     }
 
     view->setScene(sceneClone);
-    sceneCloneWidget->show();
+    sceneCloneWidget->hide();
+
+    connect(ui->viewOriginalGraphBtn, &QPushButton::clicked, this, [&](){
+        sceneCloneWidget->show();
+    });
+
+    QVector<int> res = GraphAlgos::djkstra(graph, start, end);
+    highlightFindPath(res);
 }
 
 void MainWindow::resetGraph()

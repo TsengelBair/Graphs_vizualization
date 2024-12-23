@@ -18,6 +18,13 @@
     <item row="0" column="0">
      <widget class="QGraphicsView" name="graphicsView"/>
     </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="resetFindedPathBtn">
+      <property name="text">
+       <string>Сбросить найденный маршрут</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="findPathBtn">
       <property name="text">
@@ -32,10 +39,10 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="resetFindedPathBtn">
+    <item row="4" column="0">
+     <widget class="QPushButton" name="viewOriginalGraphBtn">
       <property name="text">
-       <string>Сбросить найденный маршрут</string>
+       <string>Исходный граф</string>
       </property>
      </widget>
     </item>
