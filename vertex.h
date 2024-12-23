@@ -12,6 +12,8 @@ public:
 
     int getIndex() const ;
 
+    Vertex *clone();
+
 signals:
     /* сигнал клика по вершине обработаем в mainwindow */
     void signalVertexClicked(Vertex* vertex);

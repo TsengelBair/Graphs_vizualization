@@ -210,9 +210,15 @@ void MainWindow::handleFindPath()
     connect(findPath, &QPushButton::clicked, this, [=](){
         int start = startComboBox->currentIndex();
         int end = endComboBox->currentIndex();
-        QVector<int> res = GraphAlgos::djkstra(graph, start, end);
-        highlightFindPath(res);
+
         dialog->accept();
+
+        createGraphClone();
+
+//        QVector<int> res = GraphAlgos::djkstra(graph, start, end);
+//        highlightFindPath(res);
+
+//        dialog->accept();
     });
 
     dialog->exec();
@@ -234,6 +240,43 @@ void MainWindow::highlightFindPath(QVector<int>&path)
             scene->addLine(QLineF(p1, p2), QPen(Qt::blue, 2));
         }
     });
+}
+
+/* диалоговое окно, в которое скопируем созданный граф (т.е. объект сцены со всеми элементами) */
+void MainWindow::createGraphClone()
+{
+    QDialog* clonedSceneWidget = new QDialog(this);
+    clonedSceneWidget->setWindowTitle("Клонированная сцена");
+
+    QGraphicsView* view = new QGraphicsView(clonedSceneWidget);
+    view->setGeometry(10, 10, 600, 400);
+
+    QGraphicsScene* sceneClone = new QGraphicsScene();
+    sceneClone->setSceneRect(0, 0, QApplication::primaryScreen()->geometry().width(), QApplication::primaryScreen()->geometry().height());
+    for (auto item : scene->items()) {
+        if (auto vertex = dynamic_cast<Vertex*>(item)) {
+            // Копируем вершины
+            Vertex* vertexClone = vertex->clone();
+            vertexClone->setPos(vertex->pos()); // Устанавливаем позицию
+            sceneClone->addItem(vertexClone);
+        } else if (auto line = dynamic_cast<QGraphicsLineItem*>(item)) {
+            // Копируем линии (рёбра)
+            QGraphicsLineItem* lineClone = new QGraphicsLineItem(line->line());
+            lineClone->setPen(line->pen()); // Копируем свойства линии
+            sceneClone->addItem(lineClone);
+        } else if (auto text = dynamic_cast<QGraphicsTextItem*>(item)) {
+            // Копируем текст (веса рёбер)
+            QGraphicsTextItem* textClone = new QGraphicsTextItem(text->toPlainText());
+            textClone->setFont(text->font()); // Копируем шрифт текста
+            textClone->setDefaultTextColor(text->defaultTextColor()); // Копируем цвет текста
+            textClone->setPos(text->pos()); // Устанавливаем позицию текста
+            sceneClone->addItem(textClone);
+        }
+    }
+
+    view->setScene(sceneClone);
+    clonedSceneWidget->resize(600, 400);
+    clonedSceneWidget->exec();
 }
 
 void MainWindow::resetGraph()

@@ -13,7 +13,6 @@ QVector<int> GraphAlgos::djkstra(QVector<QVector<int>> &graph, int start, int en
     QVector<int> dist(n, 10000); /* Инициализируем все расстояния "бесконечностью" */
     QVector<int> from(n, -1);   /* Для хранения пути */
 
-    /* Очередь с приоритетом на основе QMultiMap */
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>>q;
 
     dist[start] = 0;

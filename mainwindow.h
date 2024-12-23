@@ -42,6 +42,11 @@ private:
     */
     void handleFindPath();
     void highlightFindPath(QVector<int>&path);
+    /*
+        создаем диалоговое окно с копией введенного графа
+        исходный граф в основном окне сбросим для визуализации
+    */
+    void createGraphClone();
 
     void resetGraph();
 

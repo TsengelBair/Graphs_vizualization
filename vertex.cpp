@@ -29,6 +29,21 @@ int Vertex::getIndex() const
     return _index;
 }
 
+Vertex *Vertex::clone()
+{
+    // Создаём новую вершину с теми же координатами, радиусом и индексом
+    qreal radius = rect().width() / 2; // Радиус вычисляем из текущего размера
+    Vertex* newVertex = new Vertex(rect().center().x(), rect().center().y(), radius, _index);
+
+    // Копируем свойства: обводка (Pen) и цвет заливки (Brush)
+    newVertex->setPen(this->pen());
+    newVertex->setBrush(this->brush());
+
+    // Текст с индексом уже создаётся в конструкторе, так что дополнительного копирования не требуется
+
+    return newVertex;
+}
+
 void Vertex::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     emit signalVertexClicked(this);
