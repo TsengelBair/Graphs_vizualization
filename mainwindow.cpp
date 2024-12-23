@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     , currentVertexNum(0)
     , radius(30.0)
     , firstSelectedVertex(nullptr)
+    , sceneCloneWidget(nullptr)
 {
     ui->setupUi(this);
 
@@ -215,10 +216,10 @@ void MainWindow::handleFindPath()
 
         createGraphClone();
 
-//        QVector<int> res = GraphAlgos::djkstra(graph, start, end);
-//        highlightFindPath(res);
+/*        QVector<int> res = GraphAlgos::djkstra(graph, start, end); */
+/*        highlightFindPath(res); */
 
-//        dialog->accept();
+/*        dialog->accept(); */
     });
 
     dialog->exec();
@@ -242,41 +243,43 @@ void MainWindow::highlightFindPath(QVector<int>&path)
     });
 }
 
-/* диалоговое окно, в которое скопируем созданный граф (т.е. объект сцены со всеми элементами) */
 void MainWindow::createGraphClone()
 {
-    QDialog* clonedSceneWidget = new QDialog(this);
-    clonedSceneWidget->setWindowTitle("Клонированная сцена");
+    sceneCloneWidget = new QWidget();
+    sceneCloneWidget->setWindowTitle("Исходный граф, на основе которого ищем кратчайшие пути");
 
-    QGraphicsView* view = new QGraphicsView(clonedSceneWidget);
-    view->setGeometry(10, 10, 600, 400);
+    /* Создаём виджет QGraphicsView */
+    QGraphicsView* view = new QGraphicsView(sceneCloneWidget);
 
+    /* Добавляем компоновку для автоматического растягивания */
+    QVBoxLayout* layout = new QVBoxLayout(sceneCloneWidget);
+    layout->addWidget(view);
+    sceneCloneWidget->setLayout(layout);
+
+    /* Создаём клонированную сцену */
     QGraphicsScene* sceneClone = new QGraphicsScene();
-    sceneClone->setSceneRect(0, 0, QApplication::primaryScreen()->geometry().width(), QApplication::primaryScreen()->geometry().height());
+    sceneClone->setSceneRect(scene->sceneRect()); /* Используем оригинальный размер сцены */
+
     for (auto item : scene->items()) {
         if (auto vertex = dynamic_cast<Vertex*>(item)) {
-            // Копируем вершины
             Vertex* vertexClone = vertex->clone();
-            vertexClone->setPos(vertex->pos()); // Устанавливаем позицию
+            vertexClone->setPos(vertex->pos()); /* Устанавливаем позицию */
             sceneClone->addItem(vertexClone);
         } else if (auto line = dynamic_cast<QGraphicsLineItem*>(item)) {
-            // Копируем линии (рёбра)
             QGraphicsLineItem* lineClone = new QGraphicsLineItem(line->line());
-            lineClone->setPen(line->pen()); // Копируем свойства линии
+            lineClone->setPen(line->pen());
             sceneClone->addItem(lineClone);
         } else if (auto text = dynamic_cast<QGraphicsTextItem*>(item)) {
-            // Копируем текст (веса рёбер)
             QGraphicsTextItem* textClone = new QGraphicsTextItem(text->toPlainText());
-            textClone->setFont(text->font()); // Копируем шрифт текста
-            textClone->setDefaultTextColor(text->defaultTextColor()); // Копируем цвет текста
-            textClone->setPos(text->pos()); // Устанавливаем позицию текста
+            textClone->setFont(text->font());
+            textClone->setDefaultTextColor(text->defaultTextColor());
+            textClone->setPos(text->pos());
             sceneClone->addItem(textClone);
         }
     }
 
     view->setScene(sceneClone);
-    clonedSceneWidget->resize(600, 400);
-    clonedSceneWidget->exec();
+    sceneCloneWidget->show();
 }
 
 void MainWindow::resetGraph()
